@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+ResNet18_aug,val,0.9775308641975309,0.9776667564310282,0.9760444444444444,0.976770499803429

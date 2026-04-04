@@ -1,0 +1,42 @@
+# Robustness analysis configuration
+# ====================================
+
+# Dataset
+dataset:
+  root: "./data/EuroSAT_RGB"
+  image_size_ml: [64, 64]       # For ML models
+  image_size_dl: [224, 224]     # For DL model
+
+# Data splitting (must match training configs)
+split:
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 42
+
+# Feature mode for ML models (must match trained model)
+feature_mode: "hog_color_texture"
+
+# Degradation settings
+degradations:
+  gaussian_blur:
+    - sigma: 1.0
+      label: "blur_low"
+    - sigma: 3.0
+      label: "blur_high"
+
+  gaussian_noise:
+    - std: 0.05
+      label: "noise_low"
+    - std: 0.15
+      label: "noise_high"
+
+  downsample:
+    - factor: 2
+      label: "downsample_2x"
+    - factor: 4
+      label: "downsample_4x"
+
+# Paths to trained models (auto-detected from results_dir)
+results_dir: "./results"
+random_seed: 42

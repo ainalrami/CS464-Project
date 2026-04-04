@@ -1,0 +1,60 @@
+# Deep Learning pipeline configuration
+# ======================================
+
+# Dataset
+dataset:
+  root: "./data/EuroSAT_RGB"
+  image_size: [224, 224]        # ResNet18 input size
+
+# Data splitting
+split:
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 42
+
+# Model
+model:
+  architecture: "resnet18"      # Options: resnet18
+  pretrained: true
+  num_classes: 10
+  freeze_backbone: false        # Fine-tune all layers
+
+# Training
+training:
+  epochs: 30
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: "adam"
+
+  # Learning rate scheduler
+  scheduler:
+    type: "reduce_on_plateau"   # ReduceLROnPlateau
+    factor: 0.5
+    patience: 3
+    min_lr: 0.00001
+
+  # Early stopping
+  early_stopping:
+    patience: 7
+    min_delta: 0.001
+
+# Data augmentation
+augmentation:
+  enabled: true
+  horizontal_flip: true
+  vertical_flip: false
+  rotation_degrees: 15
+  color_jitter:
+    brightness: 0.2
+    contrast: 0.2
+    saturation: 0.2
+    hue: 0.05
+
+# Compare with and without augmentation
+compare_augmentation: false
+
+# Output
+results_dir: "./results"
+random_seed: 42
