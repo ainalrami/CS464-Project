@@ -28,6 +28,7 @@ ML_DEMO/
 │   └── evaluation/
 │       ├── metrics.py       # Metrics computation
 │       └── plots.py         # Visualization utilities
+├── donwload_data.py         # CLI: Download EuroSAT RGB dataset
 ├── run_ml.py                # CLI: Run classical ML pipeline
 ├── run_dl.py                # CLI: Run deep learning pipeline
 ├── run_robustness.py        # CLI: Run robustness analysis
