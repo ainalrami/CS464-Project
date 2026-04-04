@@ -19,7 +19,6 @@ features:
   modes:
     - "hog"
     - "hog_color"
-    - "hog_color_texture"
   hog:
     orientations: 9
     pixels_per_cell: [8, 8]
@@ -30,23 +29,23 @@ features:
     radius: 3
     n_points: 24
 
-# Models to train
+# Models to train (FAST VERSION: fewer hyperparameters for quick testing)
 models:
   - name: "SVM"
     search:
-      C: [0.1, 1.0, 10.0]
-      kernel: ["rbf", "linear"]
-      gamma: ["scale", "auto"]
-    cv_folds: 3
-    n_iter: 6
+      C: [1.0, 10.0]
+      kernel: ["linear"]
+      gamma: ["scale"]
+    cv_folds: 2
+    n_iter: 2
 
   - name: "RandomForest"
     search:
-      n_estimators: [100, 200, 300]
-      max_depth: [10, 20, 30, null]
-      min_samples_split: [2, 5]
-    cv_folds: 3
-    n_iter: 8
+      n_estimators: [100, 200]
+      max_depth: [10, 20]
+      min_samples_split: [2]
+    cv_folds: 2
+    n_iter: 2
 
   - name: "XGBoost"        # Falls back to LogisticRegression if xgboost not installed
     search:

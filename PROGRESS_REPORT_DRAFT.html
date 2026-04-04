@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PROGRESS_REPORT_DRAFT.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="progress-report">Progress Report</h1>
+<h2 id="comparative-land-cover-classification-on-eurosat-benchmark">Comparative Land Cover Classification on EuroSAT Benchmark</h2>
+<p><strong>Course:</strong> CS-464<br>
+<strong>Section:</strong> 1<br>
+<strong>Group:</strong> 8</p>
+<p><strong>Team Members:</strong></p>
+<ul>
+<li>Ferit Bilgi (22102554) – ferit.bilgi@ug.bilkent.edu.tr</li>
+<li>Berke İsmail Erhan Asıl (22203732) – ismail.asil@ug.bilkent.edu.tr</li>
+<li>Talha Berktan Baş (22301666) – berktan.bas@ug.bilkent.edu.tr</li>
+<li>Berhan Kıyanus (22203742) – berhan.kiyanus@ug.bilkent.edu.tr</li>
+<li>Hasan Mert İncesesli (22202350) – mert.incesesli@ug.bilkent.edu.tr</li>
+</ul>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>Land use and land cover classification from satellite imagery is a core task in remote sensing and environmental monitoring. Practical applications include urban growth tracking, agricultural planning, disaster response, and ecological assessment. The quality of automated classification directly influences downstream policy and operational decisions; therefore, model robustness and interpretability are both important.</p>
+<p>In this project, we investigate multi-class classification on the EuroSAT RGB benchmark and compare classical machine learning (ML) methods with deep learning (DL) methods. Our objective is to measure predictive performance under standard clean conditions, and to analyze model behavior under synthetic image degradations that mimic real-world acquisition issues such as blur, noise, and reduced spatial resolution.</p>
+<p>The study is designed to produce a reproducible pipeline with clear experimental stages: data ingestion and split management, feature extraction (for ML), model training, evaluation, robustness testing, and result summarization. The implementation includes both modular source code and executable scripts for end-to-end runs.</p>
+<hr>
+<h2 id="2-dataset">2. Dataset</h2>
+<h3 id="21-dataset-analysis">2.1 Dataset Analysis</h3>
+<p>We use the EuroSAT RGB dataset, which contains 27,000 satellite image patches distributed across 10 classes:</p>
+<ul>
+<li>AnnualCrop</li>
+<li>Forest</li>
+<li>HerbaceousVegetation</li>
+<li>Highway</li>
+<li>Industrial</li>
+<li>Pasture</li>
+<li>PermanentCrop</li>
+<li>Residential</li>
+<li>River</li>
+<li>SeaLake</li>
+</ul>
+<p>The current project setup verifies all 10 classes and all 27,000 images in the expected directory structure. Images are stored in per-class folders, which naturally support supervised classification. The dataset exhibits common remote sensing challenges:</p>
+<ul>
+<li><strong>Inter-class similarity:</strong> some classes may share visual texture/color characteristics.</li>
+<li><strong>Intra-class variance:</strong> within-class appearance changes due to seasonal and illumination effects.</li>
+<li><strong>Scale and context limitations:</strong> patches are small and may not contain complete semantic context.</li>
+</ul>
+<h3 id="22-dataset-preprocessing">2.2 Dataset Preprocessing</h3>
+<p>The pipeline uses stratified splitting to preserve class balance across train/validation/test partitions:</p>
+<ul>
+<li>Train: 70%</li>
+<li>Validation: 15%</li>
+<li>Test: 15%</li>
+</ul>
+<p>For classical ML pipelines, images are resized to 64x64 before handcrafted feature extraction. For DL pipelines, images are resized to 224x224 and normalized with ImageNet statistics to match ResNet pretraining assumptions.</p>
+<p>The code saves split metadata (<code>split_train.csv</code>, <code>split_val.csv</code>, <code>split_test.csv</code>) and class-index mapping (<code>class_names.json</code>) for strict reproducibility across runs.</p>
+<hr>
+<h2 id="3-coding-environment">3. Coding Environment</h2>
+<h3 id="31-tools-and-libraries">3.1 Tools and Libraries</h3>
+<p>The implementation is in Python and uses:</p>
+<ul>
+<li><strong>scikit-learn</strong> for classical ML models and hyperparameter search</li>
+<li><strong>PyTorch + torchvision</strong> for deep learning and transfer learning</li>
+<li><strong>OpenCV + scikit-image</strong> for preprocessing and handcrafted features</li>
+<li><strong>pandas/numpy</strong> for data handling and numerical operations</li>
+<li><strong>matplotlib/seaborn</strong> for evaluation and publication-style plotting</li>
+<li><strong>PyYAML</strong> for configuration-driven experimentation</li>
+</ul>
+<h3 id="32-repository-and-script-structure">3.2 Repository and Script Structure</h3>
+<p>The project is organized as:</p>
+<ul>
+<li><code>run_ml.py</code>: Classical ML pipeline entry script</li>
+<li><code>run_dl.py</code>: DL pipeline entry script</li>
+<li><code>run_robustness.py</code>: Degradation-based robustness evaluation</li>
+<li><code>summarize_results.py</code>: Aggregates metrics and generates comparison plots</li>
+<li><code>src/</code>: reusable modules (<code>data</code>, <code>features</code>, <code>ml</code>, <code>dl</code>, <code>robustness</code>, <code>evaluation</code>)</li>
+<li><code>configs/</code>: YAML files for experiment settings</li>
+</ul>
+<p>This organization supports both reproducibility and incremental experimentation.</p>
+<hr>
+<h2 id="4-details-of-trained-models">4. Details of Trained Models</h2>
+<h3 id="41-classical-ml-models">4.1 Classical ML Models</h3>
+<p>The planned classical models are:</p>
+<ol>
+<li><strong>Support Vector Machine (SVM)</strong></li>
+<li><strong>Random Forest (RF)</strong></li>
+<li><strong>XGBoost</strong> (with Logistic Regression fallback if XGBoost is unavailable)</li>
+</ol>
+<p>For ML models, handcrafted feature ablation is implemented:</p>
+<ul>
+<li><code>hog</code></li>
+<li><code>hog_color</code></li>
+<li><code>hog_color_texture</code></li>
+</ul>
+<h4 id="why-these-models">Why these models?</h4>
+<ul>
+<li><strong>SVM</strong> is effective in high-dimensional feature spaces and can model non-linear decision boundaries.</li>
+<li><strong>RF</strong> is robust, handles non-linear relations, and offers strong baseline performance with low tuning burden.</li>
+<li><strong>XGBoost</strong> captures complex interactions through boosted trees and often performs strongly on engineered features.</li>
+</ul>
+<h3 id="42-deep-learning-model">4.2 Deep Learning Model</h3>
+<p>The DL model is <strong>ResNet18</strong>, optionally initialized with ImageNet pretrained weights and fine-tuned for 10-way classification.</p>
+<h4 id="why-resnet18">Why ResNet18?</h4>
+<ul>
+<li>Residual connections stabilize optimization in deeper networks.</li>
+<li>Transfer learning improves convergence and data efficiency.</li>
+<li>ResNet18 provides a good accuracy/computation tradeoff for this phase.</li>
+</ul>
+<h3 id="43-hyperparameter-effects-conceptual">4.3 Hyperparameter Effects (Conceptual)</h3>
+<ul>
+<li><strong>SVM (C, kernel):</strong> controls margin softness and decision boundary flexibility.</li>
+<li><strong>RF (n_estimators, max_depth):</strong> controls bias-variance tradeoff and ensemble capacity.</li>
+<li><strong>XGBoost (depth, learning rate, estimators):</strong> controls additive model complexity and convergence.</li>
+<li><strong>DL (learning rate, weight decay, batch size, scheduler, early stopping):</strong> affects optimization stability, overfitting, and final generalization.</li>
+</ul>
+<hr>
+<h2 id="5-experimental-setup">5. Experimental Setup</h2>
+<p>The implemented framework supports:</p>
+<ul>
+<li>Stratified data split management with metadata persistence</li>
+<li>Config-driven training through YAML files</li>
+<li>Randomized hyperparameter search for ML models</li>
+<li>Early stopping and LR scheduling for DL training</li>
+<li>Standardized metric collection (accuracy, macro precision/recall/F1)</li>
+<li>Confusion matrix and per-class report generation</li>
+</ul>
+<h3 id="current-progress-state-experiment">Current Progress-State Experiment</h3>
+<p>At the current reporting stage, we completed a stable end-to-end ML run on the full EuroSAT split (70/15/15) for two baseline models under the HOG feature setting:</p>
+<ul>
+<li><strong>SVM + HOG</strong></li>
+<li><strong>Random Forest + HOG</strong></li>
+</ul>
+<p>The objective of this stage is to establish a reproducible baseline with validated outputs (metrics files, confusion matrices, and comparison plots) before launching the full ablation matrix (additional feature modes, DL training, and robustness evaluation).</p>
+<p>These results should be interpreted as <strong>preliminary benchmark evidence</strong> for the progress checkpoint, not as final model rankings for the end-of-term submission.</p>
+<hr>
+<h2 id="6-results-current-progress-snapshot">6. Results (Current Progress Snapshot)</h2>
+<p>At this stage, the following milestones are completed and validated:</p>
+<ul>
+<li>Environment setup and dependency validation</li>
+<li>Dataset verification (27,000 images, 10 classes)</li>
+<li>Reproducible stratified split generation and persistence</li>
+<li>End-to-end ML training/evaluation for two baseline models</li>
+<li>Automatic generation of confusion matrices and comparison plots</li>
+</ul>
+<h3 id="61-quantitative-test-results">6.1 Quantitative Test Results</h3>
+<p>Current test-set summary from <code>results/metrics/overall_test_summary.csv</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align:right">Accuracy</th>
+<th style="text-align:right">Macro-Precision</th>
+<th style="text-align:right">Macro-Recall</th>
+<th style="text-align:right">Macro-F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RandomForest_hog</td>
+<td style="text-align:right">0.6232</td>
+<td style="text-align:right">0.6189</td>
+<td style="text-align:right">0.5976</td>
+<td style="text-align:right">0.5862</td>
+</tr>
+<tr>
+<td>SVM_hog</td>
+<td style="text-align:right">0.5958</td>
+<td style="text-align:right">0.5875</td>
+<td style="text-align:right">0.5800</td>
+<td style="text-align:right">0.5809</td>
+</tr>
+</tbody>
+</table>
+<p>At this checkpoint, <strong>RandomForest_hog</strong> provides the strongest overall performance among the completed runs.</p>
+<h3 id="62-visual-results">6.2 Visual Results</h3>
+<p>Figure 1: Model-level comparison (Accuracy and Macro-F1)</p>
+<p><img src="results/plots/model_comparison.png" alt="Model Comparison"></p>
+<p>Figure 2: Per-class F1 comparison</p>
+<p><img src="results/plots/per_class_f1_comparison.png" alt="Per-Class F1 Comparison"></p>
+<p>Figure 3: Test confusion matrix for SVM_hog</p>
+<p><img src="results/confusion_matrices/SVM_hog_test_cm.png" alt="SVM Test Confusion Matrix"></p>
+<p>Figure 4: Test confusion matrix for RandomForest_hog</p>
+<p><img src="results/confusion_matrices/RandomForest_hog_test_cm.png" alt="RandomForest Test Confusion Matrix"></p>
+<h3 id="63-interpretation">6.3 Interpretation</h3>
+<ul>
+<li>The pipeline has moved beyond smoke testing and now produces stable, reportable benchmark outputs.</li>
+<li>Class-level behavior is inspectable through confusion matrices and per-class F1 visualizations.</li>
+<li>Current comparisons are intentionally scoped to baseline ML settings; they provide a credible reference point for upcoming DL and robustness analyses.</li>
+</ul>
+<hr>
+<h2 id="7-future-work">7. Future Work</h2>
+<p>Remaining tasks for final delivery:</p>
+<ol>
+<li>Expand ML experiments to remaining feature modes (<code>hog_color</code>, <code>hog_color_texture</code>) and complete model matrix</li>
+<li>Run full DL training (ResNet18 with/without augmentation)</li>
+<li>Run robustness experiments under configured degradations (blur, noise, downsampling)</li>
+<li>Integrate DL and robustness outputs into unified final comparison tables</li>
+<li>Extend error analysis with cross-model class confusion trends</li>
+<li>Final report polishing and limitations discussion</li>
+</ol>
+<p>Additionally, we plan to include a concise discussion on computational cost and training-time tradeoffs between ML and DL settings.</p>
+<hr>
+<h2 id="8-workload-distribution">8. Workload Distribution</h2>
+<p>The implementation is organized to support explicit division of labor. Current and planned role mapping:</p>
+<ul>
+<li><strong>Data pipeline and reproducibility:</strong> dataset setup, split persistence, metadata checks</li>
+<li><strong>Classical ML track:</strong> feature engineering, ML training/search, result aggregation</li>
+<li><strong>Deep Learning track:</strong> ResNet fine-tuning, scheduler/early stopping, checkpoint management</li>
+<li><strong>Robustness and analysis:</strong> degradation generation, robustness evaluation scripts, visualization</li>
+<li><strong>Documentation and presentation:</strong> progress report writing, demo preparation, final narrative integration</li>
+</ul>
+<p>In the final submission, each member’s specific completed tasks (files/modules and experiment ownership) will be listed explicitly.</p>
+<hr>
+<h2 id="9-references">9. References</h2>
+<ol>
+<li>
+<p>Helber, P., Bischke, B., Dengel, A., &amp; Borth, D. (2018). <em>EuroSAT: A Novel Dataset and Deep Learning Benchmark for Land Use and Land Cover Classification</em>. Zenodo. Available: https://zenodo.org/records/7711810</p>
+</li>
+<li>
+<p>Pedregosa, F. et al. (2011). <em>Scikit-learn: Machine Learning in Python</em>. Journal of Machine Learning Research.</p>
+</li>
+<li>
+<p>He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). <em>Deep Residual Learning for Image Recognition</em>. CVPR.</p>
+</li>
+</ol>
+<hr>
+<h2 id="appendix-a-experimental-output-artifacts-progress-stage">Appendix A: Experimental Output Artifacts (Progress Stage)</h2>
+<p>This appendix presents all experiment outputs produced at the current progress milestone. Artifacts are organized into three categories: quantitative metrics, per-class breakdowns, and visual outputs. All files are stored under the <code>results/</code> directory within the project repository.</p>
+<blockquote>
+<p><strong>Note:</strong> This appendix reflects the state of the pipeline at the progress reporting stage. The full experiment set (additional feature modes, DL training, robustness evaluation) will be appended in the final report submission.</p>
+</blockquote>
+<hr>
+<h3 id="a1-overall-test-performance">A.1 Overall Test Performance</h3>
+<p>The following table summarizes test-set performance for the two models trained to date, produced by <code>summarize_results.py</code> from <code>results/metrics/overall_test_summary.csv</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align:right">Accuracy</th>
+<th style="text-align:right">Macro-Precision</th>
+<th style="text-align:right">Macro-Recall</th>
+<th style="text-align:right">Macro-F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RandomForest_hog</td>
+<td style="text-align:right">0.6232</td>
+<td style="text-align:right">0.6189</td>
+<td style="text-align:right">0.5976</td>
+<td style="text-align:right">0.5862</td>
+</tr>
+<tr>
+<td>SVM_hog</td>
+<td style="text-align:right">0.5958</td>
+<td style="text-align:right">0.5875</td>
+<td style="text-align:right">0.5800</td>
+<td style="text-align:right">0.5809</td>
+</tr>
+</tbody>
+</table>
+<p>Both models were trained on the full EuroSAT training split (18,900 samples) using HOG features with a stratified 70/15/15 partition.</p>
+<hr>
+<h3 id="a2-per-class-performance-breakdown">A.2 Per-Class Performance Breakdown</h3>
+<p>The following tables are drawn from the per-model classification reports stored in <code>results/metrics/</code>.</p>
+<p><strong>Table A.2.1 — SVM_hog (Test Set)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th style="text-align:right">Precision</th>
+<th style="text-align:right">Recall</th>
+<th style="text-align:right">F1-Score</th>
+<th style="text-align:right">Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AnnualCrop</td>
+<td style="text-align:right">0.518</td>
+<td style="text-align:right">0.620</td>
+<td style="text-align:right">0.564</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>Forest</td>
+<td style="text-align:right">0.804</td>
+<td style="text-align:right">0.849</td>
+<td style="text-align:right">0.826</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>HerbaceousVegetation</td>
+<td style="text-align:right">0.360</td>
+<td style="text-align:right">0.476</td>
+<td style="text-align:right">0.410</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>Highway</td>
+<td style="text-align:right">0.529</td>
+<td style="text-align:right">0.533</td>
+<td style="text-align:right">0.531</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>Industrial</td>
+<td style="text-align:right">0.615</td>
+<td style="text-align:right">0.576</td>
+<td style="text-align:right">0.595</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>Pasture</td>
+<td style="text-align:right">0.471</td>
+<td style="text-align:right">0.400</td>
+<td style="text-align:right">0.432</td>
+<td style="text-align:right">300</td>
+</tr>
+<tr>
+<td>PermanentCrop</td>
+<td style="text-align:right">0.363</td>
+<td style="text-align:right">0.261</td>
+<td style="text-align:right">0.304</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>Residential</td>
+<td style="text-align:right">0.707</td>
+<td style="text-align:right">0.660</td>
+<td style="text-align:right">0.683</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>River</td>
+<td style="text-align:right">0.534</td>
+<td style="text-align:right">0.456</td>
+<td style="text-align:right">0.492</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>SeaLake</td>
+<td style="text-align:right">0.973</td>
+<td style="text-align:right">0.969</td>
+<td style="text-align:right">0.971</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td><strong>Macro avg</strong></td>
+<td style="text-align:right"><strong>0.587</strong></td>
+<td style="text-align:right"><strong>0.580</strong></td>
+<td style="text-align:right"><strong>0.581</strong></td>
+<td style="text-align:right">4050</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table A.2.2 — RandomForest_hog (Test Set)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th style="text-align:right">Precision</th>
+<th style="text-align:right">Recall</th>
+<th style="text-align:right">F1-Score</th>
+<th style="text-align:right">Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AnnualCrop</td>
+<td style="text-align:right">0.581</td>
+<td style="text-align:right">0.724</td>
+<td style="text-align:right">0.645</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>Forest</td>
+<td style="text-align:right">0.724</td>
+<td style="text-align:right">0.931</td>
+<td style="text-align:right">0.814</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>HerbaceousVegetation</td>
+<td style="text-align:right">0.360</td>
+<td style="text-align:right">0.427</td>
+<td style="text-align:right">0.391</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>Highway</td>
+<td style="text-align:right">0.680</td>
+<td style="text-align:right">0.619</td>
+<td style="text-align:right">0.648</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>Industrial</td>
+<td style="text-align:right">0.572</td>
+<td style="text-align:right">0.392</td>
+<td style="text-align:right">0.465</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>Pasture</td>
+<td style="text-align:right">0.605</td>
+<td style="text-align:right">0.173</td>
+<td style="text-align:right">0.269</td>
+<td style="text-align:right">300</td>
+</tr>
+<tr>
+<td>PermanentCrop</td>
+<td style="text-align:right">0.364</td>
+<td style="text-align:right">0.224</td>
+<td style="text-align:right">0.277</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>Residential</td>
+<td style="text-align:right">0.571</td>
+<td style="text-align:right">0.898</td>
+<td style="text-align:right">0.698</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td>River</td>
+<td style="text-align:right">0.755</td>
+<td style="text-align:right">0.624</td>
+<td style="text-align:right">0.683</td>
+<td style="text-align:right">375</td>
+</tr>
+<tr>
+<td>SeaLake</td>
+<td style="text-align:right">0.977</td>
+<td style="text-align:right">0.964</td>
+<td style="text-align:right">0.971</td>
+<td style="text-align:right">450</td>
+</tr>
+<tr>
+<td><strong>Macro avg</strong></td>
+<td style="text-align:right"><strong>0.619</strong></td>
+<td style="text-align:right"><strong>0.598</strong></td>
+<td style="text-align:right"><strong>0.586</strong></td>
+<td style="text-align:right">4050</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observations:</strong> Both models achieve strong performance on spectrally distinct classes (SeaLake: F1 ~0.97, Forest: F1 ~0.81–0.83). The most difficult classes are PermanentCrop and HerbaceousVegetation, which are visually similar to AnnualCrop and Pasture respectively, leading to lower recall values.</p>
+<hr>
+<h3 id="a3-model-comparison-plot">A.3 Model Comparison Plot</h3>
+<p>Figure A.1 shows accuracy and macro-F1 side-by-side for all trained models at this stage.</p>
+<p><img src="results/plots/model_comparison.png" alt="Model Comparison"></p>
+<p><em>Figure A.1 — Test-set accuracy and macro-F1 for SVM_hog and RandomForest_hog.</em></p>
+<hr>
+<h3 id="a4-per-class-f1-visualization">A.4 Per-Class F1 Visualization</h3>
+<p>Figure A.2 shows the breakdown of F1 per class for both models, allowing direct class-level comparison.</p>
+<p><img src="results/plots/per_class_f1_comparison.png" alt="Per-Class F1 Comparison"></p>
+<p><em>Figure A.2 — Per-class F1 scores across models. SeaLake and Forest consistently outperform other categories; PermanentCrop and HerbaceousVegetation remain the most challenging.</em></p>
+<hr>
+<h3 id="a5-confusion-matrices">A.5 Confusion Matrices</h3>
+<p>Figures A.3 and A.4 show the test-set confusion matrices for SVM_hog and RandomForest_hog respectively.</p>
+<p><img src="results/confusion_matrices/SVM_hog_test_cm.png" alt="SVM Confusion Matrix"></p>
+<p><em>Figure A.3 — SVM_hog test confusion matrix. Notable confusion: HerbaceousVegetation ↔ AnnualCrop, PermanentCrop ↔ AnnualCrop.</em></p>
+<p><img src="results/confusion_matrices/RandomForest_hog_test_cm.png" alt="RandomForest Confusion Matrix"></p>
+<p><em>Figure A.4 — RandomForest_hog test confusion matrix. Higher recall for AnnualCrop and Residential but reduced precision for Pasture.</em></p>
+<hr>
+<h3 id="a6-reproducibility">A.6 Reproducibility</h3>
+<p>Split metadata and trained model checkpoints are stored for exact reproducibility:</p>
+<ul>
+<li><code>results/logs/split_train.csv</code>, <code>split_val.csv</code>, <code>split_test.csv</code> — image paths and labels per partition</li>
+<li><code>results/logs/class_names.json</code> — class-to-index mapping</li>
+<li><code>results/models/SVM_hog.pkl</code> — trained SVM pipeline (scikit-learn joblib)</li>
+<li><code>results/models/RandomForest_hog.pkl</code> — trained Random Forest pipeline</li>
+</ul>
+<hr>
+<h3 id="a7-planned-additions-for-final-submission">A.7 Planned Additions for Final Submission</h3>
+<p>The following outputs will be added as the remaining experiments are completed:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full ML ablation table (hog_color, hog_color_texture feature modes)</td>
+<td><code>run_ml.py</code></td>
+</tr>
+<tr>
+<td>DL training curves (ResNet18 ± augmentation)</td>
+<td><code>run_dl.py</code></td>
+</tr>
+<tr>
+<td>DL confusion matrices and test report</td>
+<td><code>run_dl.py</code></td>
+</tr>
+<tr>
+<td>Robustness result table (blur/noise/downsample)</td>
+<td><code>run_robustness.py</code></td>
+</tr>
+<tr>
+<td>Robustness comparison figure</td>
+<td><code>summarize_results.py</code></td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
