@@ -1,2 +1,0 @@
-model,augmentation,val_accuracy,val_f1,test_accuracy,test_f1
-ResNet18_aug,True,0.9775308641975309,0.976770499803429,0.9814814814814815,0.9807346782093103
