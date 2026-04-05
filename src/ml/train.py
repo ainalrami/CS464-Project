@@ -8,7 +8,6 @@ import logging
 from pathlib import Path
 
 import joblib
-import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
@@ -28,26 +27,26 @@ except ImportError:
     logger.info("XGBoost not installed. Using Logistic Regression as fallback.")
 
 
-def _build_estimator(model_name):
+def _build_estimator(model_name, random_seed=42):
     """
     Return an sklearn estimator and its hyperparameter search space prefix.
 
     Args:
         model_name: One of "SVM", "RandomForest", "XGBoost".
+        random_seed: Random seed passed to the estimator.
 
     Returns:
         (estimator, param_prefix) tuple.
     """
     if model_name == "SVM":
-        return SVC(probability=True, random_state=42), "clf__"
+        return SVC(probability=True, random_state=random_seed), "clf__"
     elif model_name == "RandomForest":
-        return RandomForestClassifier(random_state=42, n_jobs=-1), "clf__"
+        return RandomForestClassifier(random_state=random_seed, n_jobs=-1), "clf__"
     elif model_name == "XGBoost":
         if XGBOOST_AVAILABLE:
             return XGBClassifier(
-                use_label_encoder=False,
                 eval_metric="mlogloss",
-                random_state=42,
+                random_state=random_seed,
                 n_jobs=-1,
                 verbosity=0,
             ), "clf__"
@@ -55,9 +54,8 @@ def _build_estimator(model_name):
             logger.warning("XGBoost not found — using Logistic Regression instead.")
             return LogisticRegression(
                 max_iter=1000,
-                random_state=42,
+                random_state=random_seed,
                 n_jobs=-1,
-                multi_class="multinomial",
             ), "clf__"
     else:
         raise ValueError(f"Unknown model name: {model_name}")
@@ -92,7 +90,7 @@ def train_model(X_train, y_train, model_cfg, random_seed=42):
     cv_folds = model_cfg.get("cv_folds", 3)
     n_iter = model_cfg.get("n_iter", 5)
 
-    estimator, prefix = _build_estimator(model_name)
+    estimator, prefix = _build_estimator(model_name, random_seed)
 
     # Build pipeline: StandardScaler → Classifier
     pipeline = Pipeline([
@@ -161,8 +159,3 @@ def save_model(pipeline, model_name, output_dir):
     joblib.dump(pipeline, path)
     logger.info(f"  Model saved to {path}")
     return path
-
-
-def load_model(path):
-    """Load a saved sklearn pipeline."""
-    return joblib.load(path)

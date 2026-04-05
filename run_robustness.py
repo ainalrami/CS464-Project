@@ -21,8 +21,15 @@ import logging
 import sys
 from pathlib import Path
 
+import joblib
 import numpy as np
+import torch
 import yaml
+
+from src.data.dataset import load_split_metadata, get_dl_transforms
+from src.dl.model import build_model
+from src.robustness.evaluate import run_robustness_evaluation
+from src.evaluation.plots import plot_robustness_comparison
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,8 +62,6 @@ def main():
     # ----------------------------------------------------------------
     # 1. Load split metadata
     # ----------------------------------------------------------------
-    from src.data.dataset import load_split_metadata
-
     if not (logs_dir / "split_train.csv").exists():
         logger.error("Split metadata not found. Run run_ml.py or run_dl.py first.")
         sys.exit(1)
@@ -68,8 +73,6 @@ def main():
     # ----------------------------------------------------------------
     # 2. Load trained ML models
     # ----------------------------------------------------------------
-    import joblib
-
     models_dir = results_dir / "models"
     ml_models = {}
 
@@ -90,10 +93,6 @@ def main():
     # ----------------------------------------------------------------
     # 3. Load trained DL model
     # ----------------------------------------------------------------
-    import torch
-    from src.dl.model import build_model
-    from src.data.dataset import get_dl_transforms
-
     dl_model = None
     image_size_dl = tuple(cfg["dataset"].get("image_size_dl", [224, 224]))
     dl_transform = get_dl_transforms(image_size_dl, None, is_train=False)
@@ -103,7 +102,9 @@ def main():
     if not dl_checkpoint.exists():
         dl_checkpoint = models_dir / "ResNet18_noaug_best.pt"
 
+    dl_model_name = "ResNet18"
     if dl_checkpoint.exists():
+        dl_model_name = dl_checkpoint.stem.replace("_best", "")
         logger.info(f"Loading DL model from {dl_checkpoint}")
         dl_model = build_model(num_classes=len(class_names), pretrained=False)
         dl_model.load_state_dict(
@@ -116,9 +117,6 @@ def main():
     # ----------------------------------------------------------------
     # 4. Run robustness evaluation
     # ----------------------------------------------------------------
-    from src.robustness.evaluate import run_robustness_evaluation
-    from src.evaluation.plots import plot_robustness_comparison
-
     # Feature extraction config (from ml.yaml defaults)
     ml_yaml_path = Path("configs/ml.yaml")
     hog_cfg = {}
@@ -149,6 +147,7 @@ def main():
         color_cfg=color_cfg,
         lbp_cfg=lbp_cfg,
         results_dir=results_dir,
+        dl_model_name=dl_model_name,
     )
 
     # ----------------------------------------------------------------

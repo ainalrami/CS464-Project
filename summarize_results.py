@@ -10,11 +10,14 @@ Aggregates all metrics from results/metrics/ into a final comparison
 table and generates publication-style figures.
 """
 
+import argparse
 import logging
 import sys
 from pathlib import Path
 
 import pandas as pd
+
+from src.evaluation.plots import plot_model_comparison_bar, plot_per_class_f1
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +28,12 @@ logger = logging.getLogger("summarize")
 
 
 def main():
-    results_dir = Path("./results")
+    parser = argparse.ArgumentParser(description="Summarize ML/DL pipeline results.")
+    parser.add_argument("--results-dir", type=str, default="./results",
+                        help="Path to results directory (default: ./results).")
+    args = parser.parse_args()
+
+    results_dir = Path(args.results_dir)
     metrics_dir = results_dir / "metrics"
     plots_dir = results_dir / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
@@ -59,7 +67,6 @@ def main():
         logger.info(f"\n{test_summary.to_string(index=False)}")
 
         # Plot model comparison bar chart
-        from src.evaluation.plots import plot_model_comparison_bar
         plot_model_comparison_bar(test_summary, plots_dir / "model_comparison.png")
 
     # ----------------------------------------------------------------
@@ -81,7 +88,6 @@ def main():
             per_class_results[model_name] = per_class
 
     if per_class_results:
-        from src.evaluation.plots import plot_per_class_f1
         # Use class names from the first result
         first_model = list(per_class_results.keys())[0]
         class_names = list(per_class_results[first_model].keys())

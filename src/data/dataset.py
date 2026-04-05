@@ -11,14 +11,12 @@ EuroSAT RGB is organized as:
         ...
 """
 
-import os
 import json
 import logging
 from pathlib import Path
 
-import cv2
-import numpy as np
 import pandas as pd
+from PIL import Image
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -204,19 +202,9 @@ class EuroSATDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path, label = self.samples[idx]
-        # Load image as RGB
-        img = cv2.imread(img_path)
-        if img is None:
-            raise IOError(f"Failed to read image: {img_path}")
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        # Convert to PIL-like for torchvision transforms
-        from PIL import Image
-        img = Image.fromarray(img)
-
+        img = Image.open(img_path).convert("RGB")
         if self.transform is not None:
             img = self.transform(img)
-
         return img, label
 
 

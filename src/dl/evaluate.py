@@ -5,7 +5,6 @@ Deep learning model evaluation on test set.
 import logging
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -35,6 +34,8 @@ def evaluate_model(model, test_dataset, class_names, results_dir,
     Returns:
         metrics_dict: Dictionary of metrics.
     """
+    results_dir = Path(results_dir)
+
     # Device
     if torch.backends.mps.is_available():
         device = torch.device("mps")
@@ -46,8 +47,9 @@ def evaluate_model(model, test_dataset, class_names, results_dir,
     model = model.to(device)
     model.eval()
 
+    pin_memory = device.type == "cuda"
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
-                             num_workers=2, pin_memory=True)
+                             num_workers=2, pin_memory=pin_memory)
 
     criterion = torch.nn.CrossEntropyLoss()
     _, accuracy, y_pred, y_true = validate(model, test_loader, criterion, device)
@@ -57,8 +59,6 @@ def evaluate_model(model, test_dataset, class_names, results_dir,
     logger.info(f"  {model_tag} on {split_name}:")
     logger.info(f"    Accuracy:  {metrics['accuracy']:.4f}")
     logger.info(f"    Macro F1:  {metrics['macro_f1']:.4f}")
-
-    results_dir = Path(results_dir)
 
     # Classification report
     report_path = results_dir / "metrics" / f"{model_tag}_{split_name}_report.csv"
@@ -71,7 +71,6 @@ def evaluate_model(model, test_dataset, class_names, results_dir,
 
     # Summary metrics
     metrics_path = results_dir / "metrics" / f"{model_tag}_{split_name}_metrics.csv"
-    metrics_path.parent.mkdir(parents=True, exist_ok=True)
     summary = pd.DataFrame([{
         "model": model_tag,
         "split": split_name,

@@ -5,7 +5,6 @@ Evaluation utilities for the classical ML pipeline.
 import logging
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from src.evaluation.metrics import compute_metrics, save_classification_report, save_confusion_matrix_plot
@@ -34,6 +33,7 @@ def evaluate_model(pipeline, X, y, class_names, split_name, model_name, results_
     Returns:
         metrics_dict: Dictionary with accuracy, precision, recall, f1, per_class_f1.
     """
+    results_dir = Path(results_dir)
     y_pred = pipeline.predict(X)
 
     metrics = compute_metrics(y, y_pred, class_names)
@@ -41,9 +41,6 @@ def evaluate_model(pipeline, X, y, class_names, split_name, model_name, results_
     logger.info(f"  {model_name} on {split_name}:")
     logger.info(f"    Accuracy:  {metrics['accuracy']:.4f}")
     logger.info(f"    Macro F1:  {metrics['macro_f1']:.4f}")
-
-    # Save results
-    results_dir = Path(results_dir)
 
     # Classification report
     report_path = results_dir / "metrics" / f"{model_name}_{split_name}_report.csv"
@@ -55,7 +52,6 @@ def evaluate_model(pipeline, X, y, class_names, split_name, model_name, results_
 
     # Summary metrics CSV
     metrics_path = results_dir / "metrics" / f"{model_name}_{split_name}_metrics.csv"
-    metrics_path.parent.mkdir(parents=True, exist_ok=True)
     summary_df = pd.DataFrame([{
         "model": model_name,
         "split": split_name,

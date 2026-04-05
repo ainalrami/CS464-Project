@@ -21,7 +21,13 @@ import time
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import yaml
+
+from src.data.dataset import load_dataset, create_splits, save_split_metadata, load_split_metadata
+from src.features.extractors import extract_features_batch
+from src.ml.train import train_model, save_model
+from src.ml.evaluate import evaluate_model
 
 logging.basicConfig(
     level=logging.INFO,
@@ -55,20 +61,16 @@ def main():
     # ----------------------------------------------------------------
     # 1. Load dataset & create splits
     # ----------------------------------------------------------------
-    from src.data.dataset import load_dataset, create_splits, save_split_metadata, load_split_metadata
-
     dataset_root = cfg["dataset"]["root"]
     split_cfg = cfg["split"]
     logs_dir = results_dir / "logs"
     logs_dir.mkdir(parents=True, exist_ok=True)
 
-    split_metadata_dir = logs_dir
-
     # Check if splits already exist (for reproducibility across runs)
-    split_file = split_metadata_dir / "split_train.csv"
+    split_file = logs_dir / "split_train.csv"
     if split_file.exists():
         logger.info("Loading existing split metadata...")
-        splits, class_names = load_split_metadata(split_metadata_dir)
+        splits, class_names = load_split_metadata(logs_dir)
     else:
         logger.info("Loading dataset and creating new splits...")
         data, class_names = load_dataset(dataset_root)
@@ -79,7 +81,7 @@ def main():
             test_ratio=split_cfg["test_ratio"],
             random_seed=split_cfg["random_seed"],
         )
-        save_split_metadata(splits, split_metadata_dir, class_names)
+        save_split_metadata(splits, logs_dir, class_names)
 
     logger.info(f"Classes: {class_names}")
     logger.info(f"Train: {len(splits['train'])}, Val: {len(splits['val'])}, Test: {len(splits['test'])}")
@@ -87,8 +89,6 @@ def main():
     # ----------------------------------------------------------------
     # 2. Feature extraction (for each ablation mode)
     # ----------------------------------------------------------------
-    from src.features.extractors import extract_features_batch
-
     feature_cfg = cfg.get("features", {})
     image_size = tuple(cfg["dataset"].get("image_size", [64, 64]))
     hog_cfg = feature_cfg.get("hog", {})
@@ -99,9 +99,6 @@ def main():
     # ----------------------------------------------------------------
     # 3 & 4. Train and evaluate for each feature mode × model
     # ----------------------------------------------------------------
-    from src.ml.train import train_model, save_model
-    from src.ml.evaluate import evaluate_model
-
     model_configs = cfg.get("models", [])
     all_results = []
 
@@ -175,8 +172,6 @@ def main():
     # ----------------------------------------------------------------
     # 5. Save summary table
     # ----------------------------------------------------------------
-    import pandas as pd
-
     summary_df = pd.DataFrame(all_results)
     summary_path = results_dir / "metrics" / "ml_summary.csv"
     summary_path.parent.mkdir(parents=True, exist_ok=True)

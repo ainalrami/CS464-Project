@@ -13,7 +13,7 @@ from PIL import Image
 from tqdm import tqdm
 
 from src.robustness.degradations import apply_degradation
-from src.features.extractors import extract_features_single
+from src.features.extractors import extract_features_single, extract_features_batch
 from src.evaluation.metrics import compute_metrics
 
 logger = logging.getLogger(__name__)
@@ -94,15 +94,14 @@ def evaluate_dl_on_degraded(model, test_samples, degradation_type, deg_params,
     all_labels = []
 
     for img_path, label in tqdm(test_samples,
-                                 desc=f"DL degraded eval ({degradation_type})", unit="img"):
+                                 desc=f"DL eval ({degradation_type})", unit="img"):
         try:
             img = cv2.imread(img_path)
             if img is None:
+                logger.warning(f"Could not read image: {img_path}")
                 continue
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            # Apply degradation
             img = apply_degradation(img, degradation_type, **deg_params)
-            # Convert to PIL for torchvision transforms
             pil_img = Image.fromarray(img)
             tensor_img = transform(pil_img).unsqueeze(0).to(device)
             output = model(tensor_img)
@@ -119,7 +118,7 @@ def run_robustness_evaluation(ml_models, dl_model, dl_transform,
                               test_samples, class_names, degradations_cfg,
                               image_size_ml=(64, 64), feature_mode="hog_color_texture",
                               hog_cfg=None, color_cfg=None, lbp_cfg=None,
-                              results_dir="./results"):
+                              results_dir="./results", dl_model_name="ResNet18"):
     """
     Run the full robustness evaluation across all models and degradation conditions.
 
@@ -134,6 +133,7 @@ def run_robustness_evaluation(ml_models, dl_model, dl_transform,
         feature_mode: Feature ablation mode for ML.
         hog_cfg, color_cfg, lbp_cfg: Feature extraction configs.
         results_dir: Base results directory.
+        dl_model_name: Name to use for the DL model in results (e.g. "ResNet18_aug").
 
     Returns:
         results_df: DataFrame with columns [model, condition, accuracy, macro_f1].
@@ -141,53 +141,39 @@ def run_robustness_evaluation(ml_models, dl_model, dl_transform,
     results_dir = Path(results_dir)
     records = []
 
-    # Evaluate on clean test set first
+    # ----------------------------------------------------------------
+    # Clean test set evaluation
+    # ----------------------------------------------------------------
     logger.info("Evaluating on CLEAN test set...")
-    for model_name, pipeline in ml_models.items():
-        from src.features.extractors import extract_features_batch
+
+    # Extract ML features once and reuse across all ML models
+    if ml_models:
         X_test, y_test = extract_features_batch(
             test_samples, image_size=image_size_ml, mode=feature_mode,
-            hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg
+            hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
         )
-        y_pred = pipeline.predict(X_test)
-        metrics = compute_metrics(y_test, y_pred, class_names)
-        records.append({
-            "model": model_name, "condition": "clean",
-            "accuracy": metrics["accuracy"], "macro_f1": metrics["macro_f1"],
-        })
-
-    if dl_model is not None:
-        y_true_list, y_pred_list = [], []
-        for img_path, label in tqdm(test_samples, desc="DL clean eval"):
-            try:
-                img = cv2.imread(img_path)
-                if img is None:
-                    continue
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                pil_img = Image.fromarray(img)
-                tensor_img = dl_transform(pil_img).unsqueeze(0)
-                if torch.backends.mps.is_available():
-                    device = torch.device("mps")
-                elif torch.cuda.is_available():
-                    device = torch.device("cuda")
-                else:
-                    device = torch.device("cpu")
-                tensor_img = tensor_img.to(device)
-                dl_model.to(device)
-                dl_model.eval()
-                pred = dl_model(tensor_img).argmax(dim=1).item()
-                y_pred_list.append(pred)
-                y_true_list.append(label)
-            except Exception:
-                pass
-        if y_true_list:
-            metrics = compute_metrics(np.array(y_true_list), np.array(y_pred_list), class_names)
+        for model_name, pipeline in ml_models.items():
+            y_pred = pipeline.predict(X_test)
+            metrics = compute_metrics(y_test, y_pred, class_names)
             records.append({
-                "model": "ResNet18", "condition": "clean",
+                "model": model_name, "condition": "clean",
                 "accuracy": metrics["accuracy"], "macro_f1": metrics["macro_f1"],
             })
 
-    # Evaluate on each degradation condition
+    if dl_model is not None:
+        y_true, y_pred = evaluate_dl_on_degraded(
+            dl_model, test_samples, "none", {}, dl_transform,
+        )
+        if len(y_true) > 0:
+            metrics = compute_metrics(y_true, y_pred, class_names)
+            records.append({
+                "model": dl_model_name, "condition": "clean",
+                "accuracy": metrics["accuracy"], "macro_f1": metrics["macro_f1"],
+            })
+
+    # ----------------------------------------------------------------
+    # Degraded test set evaluation
+    # ----------------------------------------------------------------
     all_degradation_items = []
     for deg_type, levels in degradations_cfg.items():
         for level_cfg in levels:
@@ -216,13 +202,12 @@ def run_robustness_evaluation(ml_models, dl_model, dl_transform,
             )
             metrics = compute_metrics(y_true, y_pred, class_names)
             records.append({
-                "model": "ResNet18", "condition": label,
+                "model": dl_model_name, "condition": label,
                 "accuracy": metrics["accuracy"], "macro_f1": metrics["macro_f1"],
             })
 
     results_df = pd.DataFrame(records)
 
-    # Save results
     out_path = results_dir / "metrics" / "robustness_results.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     results_df.to_csv(out_path, index=False)

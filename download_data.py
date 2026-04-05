@@ -16,19 +16,19 @@ import zipfile
 import urllib.request
 import shutil
 
-# Bypass SSL certificate verification (common issue on macOS with Homebrew Python)
-ssl._create_default_https_context = ssl._create_unverified_context
-
 # EuroSAT RGB download URL
 EUROSAT_URL = "https://madm.dfki.de/files/sentinel/EuroSAT.zip"
 DATA_DIR = "./data"
 ZIP_PATH = os.path.join(DATA_DIR, "EuroSAT.zip")
-EXTRACT_DIR = os.path.join(DATA_DIR)
 FINAL_DIR = os.path.join(DATA_DIR, "EuroSAT_RGB")
 
 
 def download_with_progress(url, dest):
-    """Download a file with a progress indicator."""
+    """Download a file with a progress indicator.
+
+    SSL verification is disabled only for this request to handle common
+    certificate issues with Homebrew Python on macOS.
+    """
     print(f"Downloading from: {url}")
     print(f"Saving to: {dest}")
 
@@ -41,7 +41,13 @@ def download_with_progress(url, dest):
             sys.stdout.write(f"\r  Progress: {percent:.1f}% ({mb_downloaded:.1f}/{mb_total:.1f} MB)")
             sys.stdout.flush()
 
-    urllib.request.urlretrieve(url, dest, reporthook=progress_hook)
+    # Scope the unverified context to this download only
+    original_context = ssl._create_default_https_context
+    ssl._create_default_https_context = ssl._create_unverified_context
+    try:
+        urllib.request.urlretrieve(url, dest, reporthook=progress_hook)
+    finally:
+        ssl._create_default_https_context = original_context
     print("\n  Download complete!")
 
 
@@ -62,9 +68,9 @@ def main():
         print(f"ZIP file already exists: {ZIP_PATH}")
 
     # Extract
-    print(f"Extracting to {EXTRACT_DIR}...")
+    print(f"Extracting to {DATA_DIR}...")
     with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
-        zip_ref.extractall(EXTRACT_DIR)
+        zip_ref.extractall(DATA_DIR)
     print("  Extraction complete!")
 
     # The ZIP extracts to data/2750/ — rename to EuroSAT_RGB

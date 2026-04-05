@@ -7,8 +7,11 @@ Used by both ML and DL pipelines.
 import logging
 from pathlib import Path
 
-import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -84,11 +87,6 @@ def save_confusion_matrix_plot(y_true, y_pred, class_names, output_path, title="
         output_path: Path to save PNG.
         title: Plot title string.
     """
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 

@@ -53,7 +53,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
 
     for images, labels in dataloader:
         images = images.to(device)
-        labels = torch.tensor(labels, dtype=torch.long).to(device) if not isinstance(labels, torch.Tensor) else labels.to(device)
+        labels = labels.to(device)
 
         optimizer.zero_grad()
         outputs = model(images)
@@ -83,7 +83,7 @@ def validate(model, dataloader, criterion, device):
 
     for images, labels in dataloader:
         images = images.to(device)
-        labels = torch.tensor(labels, dtype=torch.long).to(device) if not isinstance(labels, torch.Tensor) else labels.to(device)
+        labels = labels.to(device)
 
         outputs = model(images)
         loss = criterion(outputs, labels)
@@ -140,10 +140,11 @@ def train_model(model, train_dataset, val_dataset, training_cfg, results_dir,
 
     # DataLoaders
     batch_size = training_cfg.get("batch_size", 32)
+    pin_memory = device.type == "cuda"
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
-                              num_workers=2, pin_memory=True)
+                              num_workers=2, pin_memory=pin_memory)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
-                            num_workers=2, pin_memory=True)
+                            num_workers=2, pin_memory=pin_memory)
 
     # Loss, optimizer
     criterion = nn.CrossEntropyLoss()

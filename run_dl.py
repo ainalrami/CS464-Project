@@ -21,8 +21,18 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 import yaml
+
+from src.data.dataset import (
+    load_dataset, create_splits, save_split_metadata,
+    load_split_metadata, EuroSATDataset, get_dl_transforms,
+)
+from src.dl.model import build_model
+from src.dl.train import train_model
+from src.dl.evaluate import evaluate_model
+from src.evaluation.plots import plot_training_curves
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,15 +52,6 @@ def run_training(cfg, augmentation_enabled, results_dir, model_tag):
         results_dir: Output directory.
         model_tag: Tag for naming saved files.
     """
-    from src.data.dataset import (
-        load_dataset, create_splits, save_split_metadata,
-        load_split_metadata, EuroSATDataset, get_dl_transforms,
-    )
-    from src.dl.model import build_model
-    from src.dl.train import train_model
-    from src.dl.evaluate import evaluate_model
-    from src.evaluation.plots import plot_training_curves
-
     random_seed = cfg.get("random_seed", 42)
     torch.manual_seed(random_seed)
     np.random.seed(random_seed)
@@ -186,7 +187,6 @@ def main():
         all_results.append(result_no_aug)
 
     # Save summary
-    import pandas as pd
     summary_df = pd.DataFrame(all_results)
     summary_path = results_dir / "metrics" / "dl_summary.csv"
     summary_path.parent.mkdir(parents=True, exist_ok=True)

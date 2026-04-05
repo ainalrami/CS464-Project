@@ -6,7 +6,6 @@ ResNet18 with a replaced fully-connected head for EuroSAT classification.
 
 import logging
 
-import torch
 import torch.nn as nn
 from torchvision import models
 

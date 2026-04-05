@@ -7,12 +7,13 @@ dataset:
   image_size_ml: [64, 64]       # For ML models
   image_size_dl: [224, 224]     # For DL model
 
-# Data splitting (must match training configs)
+# Data splitting — informational only, not read by run_robustness.py.
+# Split metadata is loaded from disk (saved by run_ml.py / run_dl.py).
 split:
-  train_ratio: 0.7
-  val_ratio: 0.15
-  test_ratio: 0.15
-  random_seed: 42
+  train_ratio: 0.7        # not read
+  val_ratio: 0.15         # not read
+  test_ratio: 0.15        # not read
+  random_seed: 42         # not read
 
 # Feature mode for ML models (must match trained model)
 feature_mode: "hog_color_texture"

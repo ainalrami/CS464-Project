@@ -21,6 +21,8 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
+VALID_MODES = {"hog", "hog_color", "hog_color_texture"}
+
 
 def extract_hog(img_gray, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2)):
     """
@@ -78,7 +80,7 @@ def extract_color_histogram(img_bgr, bins=32):
     return np.concatenate(features)
 
 
-def extract_lbp(img_gray, radius=3, n_points=24, bins=26):
+def extract_lbp(img_gray, radius=3, n_points=24):
     """
     Extract Local Binary Pattern histogram features.
 
@@ -86,14 +88,13 @@ def extract_lbp(img_gray, radius=3, n_points=24, bins=26):
         img_gray: 2D numpy array (grayscale).
         radius: Radius of the LBP circle.
         n_points: Number of surrounding points.
-        bins: Number of histogram bins.
 
     Returns:
         1D numpy array of LBP histogram features.
     """
     lbp = local_binary_pattern(img_gray, n_points, radius, method="uniform")
-    # Compute histogram of LBP values
-    hist, _ = np.histogram(lbp.ravel(), bins=bins, range=(0, n_points + 2), density=True)
+    # Uniform LBP produces exactly n_points + 2 distinct patterns
+    hist, _ = np.histogram(lbp.ravel(), bins=n_points + 2, range=(0, n_points + 2), density=True)
     return hist.astype(np.float64)
 
 
@@ -155,13 +156,16 @@ def extract_features_batch(samples, image_size=(64, 64), mode="hog_color_texture
     Args:
         samples: List of (image_path, label) tuples.
         image_size: (H, W) to resize images to before feature extraction.
-        mode: Feature ablation mode.
+        mode: Feature ablation mode. One of "hog", "hog_color", "hog_color_texture".
         hog_cfg, color_cfg, lbp_cfg: Feature-specific config dicts.
 
     Returns:
         X: 2D numpy array of shape (N, D).
         y: 1D numpy array of labels.
     """
+    if mode not in VALID_MODES:
+        raise ValueError(f"Unknown feature mode '{mode}'. Must be one of {VALID_MODES}.")
+
     features_list = []
     labels = []
     skipped = 0
@@ -184,6 +188,9 @@ def extract_features_batch(samples, image_size=(64, 64), mode="hog_color_texture
 
     if skipped > 0:
         logger.warning(f"Skipped {skipped} images due to errors.")
+
+    if not features_list:
+        raise RuntimeError("No features could be extracted — all images failed to load.")
 
     X = np.array(features_list, dtype=np.float64)
     y = np.array(labels, dtype=np.int64)

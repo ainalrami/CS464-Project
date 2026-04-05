@@ -15,7 +15,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,17 @@ def plot_training_curves(log_csv_path, output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    log_csv_path = Path(log_csv_path)
+    if not log_csv_path.exists():
+        logger.warning(f"Training log not found, skipping curves plot: {log_csv_path}")
+        return
+
     df = pd.read_csv(log_csv_path)
+    expected_cols = {"epoch", "train_loss", "val_loss", "train_acc", "val_acc"}
+    missing = expected_cols - set(df.columns)
+    if missing:
+        logger.warning(f"Training log missing columns {missing}, skipping curves plot.")
+        return
 
     # Loss curves
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))

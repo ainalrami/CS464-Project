@@ -81,7 +81,9 @@ def apply_degradation(img, degradation_type, **kwargs):
     Returns:
         Degraded image.
     """
-    if degradation_type == "gaussian_blur":
+    if degradation_type == "none":
+        return img
+    elif degradation_type == "gaussian_blur":
         return apply_gaussian_blur(img, sigma=kwargs.get("sigma", 1.0))
     elif degradation_type == "gaussian_noise":
         return apply_gaussian_noise(img, std=kwargs.get("std", 0.05))
