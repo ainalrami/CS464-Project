@@ -90,6 +90,7 @@ def train_model(X_train, y_train, model_cfg, random_seed=42):
     search_space = model_cfg.get("search", {})
     cv_folds = model_cfg.get("cv_folds", 3)
     n_iter = model_cfg.get("n_iter", 5)
+    search_n_jobs = model_cfg.get("n_jobs", -1)
 
     estimator, prefix = _build_estimator(model_name, random_seed)
 
@@ -122,7 +123,7 @@ def train_model(X_train, y_train, model_cfg, random_seed=42):
         cv=cv_folds,
         scoring="accuracy",
         random_state=random_seed,
-        n_jobs=-1,
+        n_jobs=search_n_jobs,
         verbose=model_cfg.get("verbose", 2),
     )
     search.fit(X_train, y_train)

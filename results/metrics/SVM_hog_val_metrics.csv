@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+SVM_hog,val,0.7355555555555555,0.7343812978673825,0.723688888888889,0.7267610586329926

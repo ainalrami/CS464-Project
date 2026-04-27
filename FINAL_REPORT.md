@@ -155,13 +155,19 @@ Images are resized from 64×64 to **224×224** and normalized with ImageNet stat
 
 #### 3.3.2 Data Augmentation
 
+**What is augmentation?** Data augmentation artificially increases training set diversity by applying random transformations to images (e.g., flips, rotations, color changes). This forces the model to learn features that are robust to these variations, rather than memorizing the exact training set. Augmentation is applied **only during training**; validation and test sets remain unchanged for unbiased evaluation.
+
 Applied only during training (not validation/test):
 
 | Augmentation | Value | Reason |
 |---|---|---|
-| RandomHorizontalFlip | p=0.5 | Satellite images have no canonical orientation |
-| RandomRotation | ±15° | Slight rotation invariance without distorting class content |
-| ColorJitter | brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05 | Simulates varying illumination and sensor conditions |
+| RandomHorizontalFlip | p=0.5 | Satellite images have no canonical orientation; flipping does not change class label |
+| RandomRotation | ±15° | Slight rotation invariance without distorting or changing class content |
+| ColorJitter | brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05 | Simulates varying illumination conditions, sensor differences, and atmospheric effects |
+
+**Augmentation benefit:** By exposing the model to ±15° rotations and color variations during training, the network learns features that are invariant to these realistic image transformations. Without augmentation, the model might overfit to the exact colors and orientations present in the training set and perform poorly on real satellite data with different acquisition conditions.
+
+**Is augmentation better?** In most image-classification settings, yes: augmentation usually improves validation/test generalization and robustness. In our current configuration, we train augmented runs (`compare_augmentation: false`, `augmentation.enabled: true`). Therefore, we report augmentation as a design choice. A strict quantitative claim such as "augmentation improves accuracy by X%" requires an explicit no-augmentation baseline run under identical settings.
 
 #### 3.3.3 Model 1 — ResNet18 (Transfer Learning)
 
