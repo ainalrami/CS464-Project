@@ -22,6 +22,7 @@ results/models/RandomForest_*.pkl
 # DL checkpoints (large)
 results/models/*.pt
 results/models/*.joblib
+results/.DS_Store
 
 # Jupyter
 .ipynb_checkpoints/

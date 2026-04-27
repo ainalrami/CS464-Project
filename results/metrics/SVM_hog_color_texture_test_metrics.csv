@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+SVM_hog_color_texture,test,0.8760493827160494,0.8744760494159383,0.8694444444444445,0.8709670710763457
