@@ -42,6 +42,8 @@ def main():
     parser = argparse.ArgumentParser(description="Run classical ML pipeline on EuroSAT RGB.")
     parser.add_argument("--config", type=str, default="configs/ml.yaml",
                         help="Path to ML config YAML file.")
+    parser.add_argument("--model", type=str, default=None,
+                        help="Run only this model: SVM | RandomForest | XGBoost  (default: all)")
     args = parser.parse_args()
 
     # Load config
@@ -110,6 +112,12 @@ def main():
     # 3 & 4. Train and evaluate for each image size × feature mode × model
     # ----------------------------------------------------------------
     model_configs = cfg.get("models", [])
+    if args.model:
+        model_configs = [m for m in model_configs if m["name"].lower() == args.model.lower()]
+        if not model_configs:
+            logger.error(f"Model '{args.model}' not found in config. Available: {[m['name'] for m in cfg.get('models', [])]}")
+            sys.exit(1)
+        logger.info(f"Running only: {args.model}")
     total_experiments = sum(len(modes_for_size) for _, _, modes_for_size in experiments) * len(model_configs)
     all_results = []
 

@@ -52,7 +52,8 @@ def evaluate_model(model, test_dataset, class_names, results_dir,
                              num_workers=2, pin_memory=pin_memory)
 
     criterion = torch.nn.CrossEntropyLoss()
-    _, accuracy, y_pred, y_true = validate(model, test_loader, criterion, device)
+    _, accuracy, y_pred, y_true = validate(model, test_loader, criterion, device,
+                                           desc=f"{model_tag} [{split_name}]")
 
     metrics = compute_metrics(y_true, y_pred, class_names)
 

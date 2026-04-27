@@ -87,7 +87,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device, epoch=None,
 
 
 @torch.no_grad()
-def validate(model, dataloader, criterion, device):
+def validate(model, dataloader, criterion, device, desc="val"):
     """Run validation, return average loss, accuracy, all predictions and labels."""
     model.eval()
     running_loss = 0.0
@@ -96,7 +96,8 @@ def validate(model, dataloader, criterion, device):
     all_preds = []
     all_labels = []
 
-    for images, labels in dataloader:
+    for images, labels in tqdm(dataloader, desc=desc, unit="batch",
+                               dynamic_ncols=True, leave=False):
         images = images.to(device)
         labels = labels.to(device)
 
@@ -204,7 +205,8 @@ def train_model(model, train_dataset, val_dataset, training_cfg, results_dir,
             total_epochs=epochs,
             model_tag=model_tag,
         )
-        val_loss, val_acc, _, _ = validate(model, val_loader, criterion, device)
+        val_loss, val_acc, _, _ = validate(model, val_loader, criterion, device,
+                                           desc=f"{model_tag} e{epoch}/{epochs} val")
         elapsed = time.time() - t0
 
         scheduler.step(val_loss)
