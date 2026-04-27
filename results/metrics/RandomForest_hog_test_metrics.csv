@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+RandomForest_hog,test,0.6306172839506173,0.6420917358426043,0.6042000000000001,0.5927199031852078
