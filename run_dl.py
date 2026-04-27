@@ -168,6 +168,9 @@ def main():
     parser = argparse.ArgumentParser(description="Run deep learning pipeline on EuroSAT RGB.")
     parser.add_argument("--config", type=str, default="configs/dl.yaml",
                         help="Path to DL config YAML file.")
+    parser.add_argument("--noaug-only", action="store_true",
+                        help="Skip augmented runs, train only noaug models. "
+                             "Use after a previous --aug run to avoid re-training.")
     args = parser.parse_args()
 
     # Load config
@@ -183,12 +186,20 @@ def main():
     results_dir.mkdir(parents=True, exist_ok=True)
 
     all_results = []
+    noaug_only = args.noaug_only
 
     # Support both "architectures" (list) and legacy "architecture" (single string)
     arch_field = cfg["model"].get("architectures", cfg["model"].get("architecture", "resnet18"))
     architectures = arch_field if isinstance(arch_field, list) else [arch_field]
-    runs_per_architecture = 2 if cfg.get("compare_augmentation", False) else 1
-    total_runs = len(architectures) * runs_per_architecture
+
+    run_aug   = not noaug_only
+    run_noaug = noaug_only or cfg.get("compare_augmentation", False)
+
+    runs_per_arch = int(run_aug) + int(run_noaug)
+    total_runs = len(architectures) * runs_per_arch
+
+    if noaug_only:
+        logger.info("--noaug-only: skipping augmented runs, training noaug models only.")
 
     with tqdm(total=total_runs, desc="DL progress", unit="model", dynamic_ncols=True) as progress_bar:
         for arch in architectures:
@@ -199,13 +210,14 @@ def main():
             logger.info(f"Architecture: {arch_lower.upper()}")
             logger.info(f"{'=' * 60}")
 
-            progress_bar.set_postfix(stage=f"{tag_prefix}_aug")
-            result = run_training(cfg, augmentation_enabled=True, results_dir=results_dir,
-                                  model_tag=f"{tag_prefix}_aug", architecture=arch_lower)
-            all_results.append(result)
-            progress_bar.update(1)
+            if run_aug:
+                progress_bar.set_postfix(stage=f"{tag_prefix}_aug")
+                result = run_training(cfg, augmentation_enabled=True, results_dir=results_dir,
+                                      model_tag=f"{tag_prefix}_aug", architecture=arch_lower)
+                all_results.append(result)
+                progress_bar.update(1)
 
-            if cfg.get("compare_augmentation", False):
+            if run_noaug:
                 logger.info(f"\nRunning {arch_lower} WITHOUT augmentation...")
                 progress_bar.set_postfix(stage=f"{tag_prefix}_noaug")
                 result_no_aug = run_training(cfg, augmentation_enabled=False, results_dir=results_dir,
@@ -213,11 +225,18 @@ def main():
                 all_results.append(result_no_aug)
                 progress_bar.update(1)
 
-    # Save summary
-    summary_df = pd.DataFrame(all_results)
+    # Save summary — merge with existing file so aug + noaug runs accumulate
     summary_path = results_dir / "metrics" / "dl_summary.csv"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
-    summary_df.to_csv(summary_path, index=False)
+    new_df = pd.DataFrame(all_results)
+    if summary_path.exists():
+        existing = pd.read_csv(summary_path)
+        combined = pd.concat([existing, new_df], ignore_index=True).drop_duplicates(
+            subset=["model"], keep="last"
+        )
+    else:
+        combined = new_df
+    combined.to_csv(summary_path, index=False)
 
     logger.info(f"\n{'=' * 60}")
     logger.info("DL Pipeline Complete!")
