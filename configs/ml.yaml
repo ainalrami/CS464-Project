@@ -62,6 +62,8 @@ models:
 # Upscaling comparison:
 #   Reruns only hog_color_texture mode at 128x128 (not all 3 modes)
 #   to keep total runtime manageable.
+# Set only_upscaled=true to skip native runs entirely (useful for low-RAM machines).
+only_upscaled: false
 compare_upscaled: true
 image_size_upscaled: [128, 128]
 upscaled_modes:                   # subset of modes to run at upscaled size

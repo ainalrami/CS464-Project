@@ -15,6 +15,7 @@ Runs the complete classical ML pipeline:
 """
 
 import argparse
+import gc
 import logging
 import sys
 import time
@@ -103,10 +104,16 @@ def main():
     # upscaled_modes: subset of modes to run at larger size (avoids running all 3 modes × 2 sizes)
     upscaled_modes = cfg.get("upscaled_modes", feature_modes)
 
-    experiments = [("native", native_size, feature_modes)]
+    experiments = []
+    if not cfg.get("only_upscaled", False):
+        experiments.append(("native", native_size, feature_modes))
     if cfg.get("compare_upscaled", False):
         up_size = tuple(cfg.get("image_size_upscaled", [128, 128]))
         experiments.append(("upscaled", up_size, upscaled_modes))
+
+    if not experiments:
+        logger.error("No experiments selected. Check 'only_upscaled' and 'compare_upscaled' in config.")
+        sys.exit(1)
 
     # ----------------------------------------------------------------
     # 3 & 4. Train and evaluate for each image size × feature mode × model
@@ -200,6 +207,10 @@ def main():
                         "train_time_s": train_time,
                     })
                     progress_bar.update(1)
+
+                # Release large matrices before next feature mode / image size block.
+                del X_train, y_train, X_val, y_val, X_test, y_test
+                gc.collect()
 
     # ----------------------------------------------------------------
     # 5. Save summary table

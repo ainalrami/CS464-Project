@@ -95,7 +95,7 @@ def extract_lbp(img_gray, radius=3, n_points=24):
     lbp = local_binary_pattern(img_gray, n_points, radius, method="uniform")
     # Uniform LBP produces exactly n_points + 2 distinct patterns
     hist, _ = np.histogram(lbp.ravel(), bins=n_points + 2, range=(0, n_points + 2), density=True)
-    return hist.astype(np.float64)
+    return hist.astype(np.float32)
 
 
 def extract_features_single(img_bgr, mode="hog_color_texture", hog_cfg=None, color_cfg=None, lbp_cfg=None):
@@ -192,7 +192,8 @@ def extract_features_batch(samples, image_size=(64, 64), mode="hog_color_texture
     if not features_list:
         raise RuntimeError("No features could be extracted — all images failed to load.")
 
-    X = np.array(features_list, dtype=np.float64)
+    # float32 halves RAM usage versus float64 and is sufficient for these features.
+    X = np.array(features_list, dtype=np.float32)
     y = np.array(labels, dtype=np.int64)
     logger.info(f"Feature matrix shape: {X.shape}")
     return X, y
