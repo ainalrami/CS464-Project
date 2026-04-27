@@ -14,7 +14,12 @@ env/
 
 # Data
 data/
-results/
+
+# Trained model artifacts — too large for GitHub (>100MB each)
+# Available via cloud link, see results/models/README.md
+results/models/*.pkl
+results/models/*.pt
+results/models/*.joblib
 
 # Jupyter
 .ipynb_checkpoints/

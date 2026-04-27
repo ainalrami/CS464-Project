@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+RandomForest_hog_color,test,0.8234567901234567,0.8147121381081359,0.8163555555555556,0.8126120137931216
