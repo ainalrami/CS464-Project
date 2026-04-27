@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+XGBoost_hog_color,test,0.894074074074074,0.8894427473061471,0.8895777777777779,0.8890817381492984

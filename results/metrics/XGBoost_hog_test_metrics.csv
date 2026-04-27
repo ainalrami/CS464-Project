@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+XGBoost_hog,test,0.7140740740740741,0.7101663803875835,0.7025111111111111,0.7052050115184201

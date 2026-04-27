@@ -15,10 +15,11 @@ env/
 # Data
 data/
 
+# Trained RandomForest models — too large for GitHub (186-291 MB each)
+# Available via Google Drive link, see results/models/README.md
+results/models/RandomForest_*.pkl
 
-# Trained model artifacts — too large for GitHub (>100MB each)
-# Available via cloud link, see results/models/README.md
-results/models/*.pkl
+# DL checkpoints (large)
 results/models/*.pt
 results/models/*.joblib
 
