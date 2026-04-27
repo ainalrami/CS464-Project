@@ -200,15 +200,15 @@ Additionally, we plan to include a concise discussion on computational cost and 
 ---
 
 ## 8. Workload Distribution
-The implementation is organized to support explicit division of labor. Current and planned role mapping:
+The current implementation and reporting tasks were distributed explicitly across team members as follows:
 
-- **Data pipeline and reproducibility:** dataset setup, split persistence, metadata checks
-- **Classical ML track:** feature engineering, ML training/search, result aggregation
-- **Deep Learning track:** ResNet fine-tuning, scheduler/early stopping, checkpoint management
-- **Robustness and analysis:** degradation generation, robustness evaluation scripts, visualization
-- **Documentation and presentation:** progress report writing, demo preparation, final narrative integration
+- **Talha Berktan Baş (22301666):** Implemented core model-side code components, including the main ML/DL model pipeline structure and related training/evaluation flow modules used by the runnable scripts.
+- **Berke İsmail Erhan Asıl (22203732):** Executed model training runs, generated result tables and summary artifacts, exported visual outputs, and integrated the produced figures/tables into the report/PDF deliverables.
+- **Berhan Kıyanus (22203742):** Implemented and refined model-related code for the classical ML track (feature/model experimentation support), and contributed to evaluation-side script improvements.
+- **Ferit Bilgi (22102554):** Managed dataset organization and reproducibility workflow (data/split checks, metadata consistency, run readiness), and supported experiment orchestration and validation.
+- **Hasan Mert İncesesli (22202350):** Led report writing/editing, section organization, and final progress-report narrative consistency (results interpretation, formatting, and submission preparation).
 
-In the final submission, each member’s specific completed tasks (files/modules and experiment ownership) will be listed explicitly.
+This distribution will be finalized in the end-of-term report with any additional experiment ownership updates (DL full runs and robustness stage).
 
 ---
 

@@ -44,14 +44,22 @@ class EarlyStopping:
             self.counter = 0
 
 
-def train_one_epoch(model, dataloader, criterion, optimizer, device):
+def train_one_epoch(model, dataloader, criterion, optimizer, device, epoch=None, total_epochs=None, model_tag="model"):
     """Run one training epoch, return average loss and accuracy."""
     model.train()
     running_loss = 0.0
     correct = 0
     total = 0
 
-    for images, labels in dataloader:
+    batch_iterator = tqdm(
+        dataloader,
+        desc=f"{model_tag} e{epoch}/{total_epochs} batches",
+        unit="batch",
+        dynamic_ncols=True,
+        leave=False,
+    )
+
+    for batch_index, (images, labels) in enumerate(batch_iterator, start=1):
         images = images.to(device)
         labels = labels.to(device)
 
@@ -65,6 +73,13 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         _, predicted = outputs.max(1)
         total += labels.size(0)
         correct += predicted.eq(labels).sum().item()
+        batch_iterator.set_postfix(
+            batch=batch_index,
+            loss=f"{loss.item():.4f}",
+            acc=f"{correct / total:.4f}",
+        )
+
+    batch_iterator.close()
 
     avg_loss = running_loss / total
     accuracy = correct / total
@@ -176,9 +191,19 @@ def train_model(model, train_dataset, val_dataset, training_cfg, results_dir,
 
     logger.info(f"  Starting training for up to {epochs} epochs...")
 
-    for epoch in range(1, epochs + 1):
+    epoch_progress = tqdm(range(1, epochs + 1), desc=f"{model_tag} epochs", unit="epoch", dynamic_ncols=True, leave=True)
+    for epoch in epoch_progress:
         t0 = time.time()
-        train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
+        train_loss, train_acc = train_one_epoch(
+            model,
+            train_loader,
+            criterion,
+            optimizer,
+            device,
+            epoch=epoch,
+            total_epochs=epochs,
+            model_tag=model_tag,
+        )
         val_loss, val_acc, _, _ = validate(model, val_loader, criterion, device)
         elapsed = time.time() - t0
 
@@ -191,6 +216,7 @@ def train_model(model, train_dataset, val_dataset, training_cfg, results_dir,
             f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} | "
             f"LR: {current_lr:.6f} | {elapsed:.1f}s"
         )
+        epoch_progress.set_postfix(train_loss=f"{train_loss:.4f}", val_acc=f"{val_acc:.4f}", lr=f"{current_lr:.2e}")
 
         log_records.append({
             "epoch": epoch,
@@ -210,7 +236,11 @@ def train_model(model, train_dataset, val_dataset, training_cfg, results_dir,
         # Early stopping check
         early_stopping(val_loss)
         if early_stopping.should_stop:
+            epoch_progress.close()
             break
+
+    if not early_stopping.should_stop:
+        epoch_progress.close()
 
     # Save training log
     log_path = logs_dir / f"{model_tag}_training_log.csv"

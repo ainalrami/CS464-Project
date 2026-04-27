@@ -123,7 +123,7 @@ def train_model(X_train, y_train, model_cfg, random_seed=42):
         scoring="accuracy",
         random_state=random_seed,
         n_jobs=-1,
-        verbose=0,
+        verbose=model_cfg.get("verbose", 2),
     )
     search.fit(X_train, y_train)
 

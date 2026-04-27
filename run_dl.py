@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
+from tqdm import tqdm
 
 from src.data.dataset import (
     load_dataset, create_splits, save_split_metadata,
@@ -186,24 +187,31 @@ def main():
     # Support both "architectures" (list) and legacy "architecture" (single string)
     arch_field = cfg["model"].get("architectures", cfg["model"].get("architecture", "resnet18"))
     architectures = arch_field if isinstance(arch_field, list) else [arch_field]
+    runs_per_architecture = 2 if cfg.get("compare_augmentation", False) else 1
+    total_runs = len(architectures) * runs_per_architecture
 
-    for arch in architectures:
-        arch_lower = arch.lower()
-        tag_prefix = "CNN" if arch_lower == "cnn" else "ResNet18"
+    with tqdm(total=total_runs, desc="DL progress", unit="model", dynamic_ncols=True) as progress_bar:
+        for arch in architectures:
+            arch_lower = arch.lower()
+            tag_prefix = "CNN" if arch_lower == "cnn" else "ResNet18"
 
-        logger.info(f"\n{'=' * 60}")
-        logger.info(f"Architecture: {arch_lower.upper()}")
-        logger.info(f"{'=' * 60}")
+            logger.info(f"\n{'=' * 60}")
+            logger.info(f"Architecture: {arch_lower.upper()}")
+            logger.info(f"{'=' * 60}")
 
-        result = run_training(cfg, augmentation_enabled=True, results_dir=results_dir,
-                              model_tag=f"{tag_prefix}_aug", architecture=arch_lower)
-        all_results.append(result)
+            progress_bar.set_postfix(stage=f"{tag_prefix}_aug")
+            result = run_training(cfg, augmentation_enabled=True, results_dir=results_dir,
+                                  model_tag=f"{tag_prefix}_aug", architecture=arch_lower)
+            all_results.append(result)
+            progress_bar.update(1)
 
-        if cfg.get("compare_augmentation", False):
-            logger.info(f"\nRunning {arch_lower} WITHOUT augmentation...")
-            result_no_aug = run_training(cfg, augmentation_enabled=False, results_dir=results_dir,
-                                         model_tag=f"{tag_prefix}_noaug", architecture=arch_lower)
-            all_results.append(result_no_aug)
+            if cfg.get("compare_augmentation", False):
+                logger.info(f"\nRunning {arch_lower} WITHOUT augmentation...")
+                progress_bar.set_postfix(stage=f"{tag_prefix}_noaug")
+                result_no_aug = run_training(cfg, augmentation_enabled=False, results_dir=results_dir,
+                                             model_tag=f"{tag_prefix}_noaug", architecture=arch_lower)
+                all_results.append(result_no_aug)
+                progress_bar.update(1)
 
     # Save summary
     summary_df = pd.DataFrame(all_results)
