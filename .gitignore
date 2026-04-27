@@ -15,6 +15,7 @@ env/
 # Data
 data/
 
+
 # Trained model artifacts — too large for GitHub (>100MB each)
 # Available via cloud link, see results/models/README.md
 results/models/*.pkl
