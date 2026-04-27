@@ -49,6 +49,7 @@ def _build_estimator(model_name, random_seed=42):
                 random_state=random_seed,
                 n_jobs=-1,
                 verbosity=0,
+                tree_method="hist",   # histogram-based: 10-50x faster than exact
             ), "clf__"
         else:
             logger.warning("XGBoost not found — using Logistic Regression instead.")

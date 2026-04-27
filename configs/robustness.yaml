@@ -15,7 +15,8 @@ split:
   test_ratio: 0.15        # not read
   random_seed: 42         # not read
 
-# Feature mode for ML models (must match trained model)
+# Feature mode for ML models (must exactly match the suffix of trained model filenames)
+# Trained models are named: SVM_hog, RandomForest_hog_color, XGBoost_hog_color_texture, etc.
 feature_mode: "hog_color_texture"
 
 # Degradation settings

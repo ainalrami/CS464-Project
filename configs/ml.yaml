@@ -4,7 +4,7 @@
 # Dataset
 dataset:
   root: "./data/EuroSAT_RGB"
-  image_size: [64, 64]          # Resize images before feature extraction
+  image_size: [64, 64]
 
 # Data splitting
 split:
@@ -15,10 +15,11 @@ split:
 
 # Feature extraction
 features:
-  # Feature ablation modes: "hog", "hog_color", "hog_color_texture"
+  # All 3 modes run at native size — gives feature ablation comparison
   modes:
     - "hog"
     - "hog_color"
+    - "hog_color_texture"
   hog:
     orientations: 9
     pixels_per_cell: [8, 8]
@@ -29,31 +30,41 @@ features:
     radius: 3
     n_points: 24
 
-# Models to train (FAST VERSION: fewer hyperparameters for quick testing)
+# Models to train
 models:
   - name: "SVM"
     search:
-      C: [1.0, 10.0]
-      kernel: ["linear"]
+      C: [0.1, 1.0, 10.0]
+      kernel: ["linear", "rbf"]
       gamma: ["scale"]
     cv_folds: 2
-    n_iter: 2
+    n_iter: 4
 
   - name: "RandomForest"
     search:
-      n_estimators: [100, 200]
-      max_depth: [10, 20]
-      min_samples_split: [2]
-    cv_folds: 2
-    n_iter: 2
-
-  - name: "XGBoost"        # Falls back to LogisticRegression if xgboost not installed
-    search:
       n_estimators: [100, 200, 300]
-      max_depth: [3, 6, 10]
-      learning_rate: [0.01, 0.1, 0.3]
-    cv_folds: 3
-    n_iter: 8
+      max_depth: [10, 20, null]
+      min_samples_split: [2, 5]
+    cv_folds: 2
+    n_iter: 4
+
+  # tree_method=hist: 10-50x faster than default exact method
+  - name: "XGBoost"
+    search:
+      n_estimators: [100, 200]
+      max_depth: [3, 6]
+      learning_rate: [0.05, 0.1, 0.2]
+      subsample: [0.8, 1.0]
+    cv_folds: 2
+    n_iter: 5
+
+# Upscaling comparison:
+#   Reruns only hog_color_texture mode at 128x128 (not all 3 modes)
+#   to keep total runtime manageable.
+compare_upscaled: true
+image_size_upscaled: [128, 128]
+upscaled_modes:                   # subset of modes to run at upscaled size
+  - "hog_color_texture"
 
 # Output
 results_dir: "./results"

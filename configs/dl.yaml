@@ -15,29 +15,28 @@ split:
 
 # Model
 model:
-  architecture: "resnet18"      # Options: resnet18
+  architectures: ["resnet18", "cnn"]   # Both are trained in a single run
   pretrained: true
   num_classes: 10
-  freeze_backbone: false        # Fine-tune all layers
+  freeze_backbone: false        # Fine-tune all layers (ResNet18 only)
+  # CNN-specific
+  cnn_dropout: 0.5
 
-# Training (FAST VERSION: fewer epochs for quick testing)
 training:
-  epochs: 5
+  epochs: 30
   batch_size: 64
   learning_rate: 0.001
   weight_decay: 0.0001
-  optimizer: "adam"             # NOTE: not currently read by train.py — Adam is hardcoded
+  optimizer: "adam"
 
-  # Learning rate scheduler
   scheduler:
-    type: "reduce_on_plateau"   # ReduceLROnPlateau
+    type: "reduce_on_plateau"
     factor: 0.5
-    patience: 2
+    patience: 3
     min_lr: 0.00001
 
-  # Early stopping
   early_stopping:
-    patience: 3
+    patience: 7
     min_delta: 0.001
 
 # Data augmentation

@@ -87,87 +87,101 @@ def main():
     logger.info(f"Train: {len(splits['train'])}, Val: {len(splits['val'])}, Test: {len(splits['test'])}")
 
     # ----------------------------------------------------------------
-    # 2. Feature extraction (for each ablation mode)
+    # 2. Feature extraction (for each ablation mode × image size)
     # ----------------------------------------------------------------
     feature_cfg = cfg.get("features", {})
-    image_size = tuple(cfg["dataset"].get("image_size", [64, 64]))
     hog_cfg = feature_cfg.get("hog", {})
     color_cfg = feature_cfg.get("color_histogram", {})
     lbp_cfg = feature_cfg.get("lbp", {})
     feature_modes = feature_cfg.get("modes", ["hog_color_texture"])
 
+    # Build list of (size_label, image_size, modes_to_run) triples
+    native_size = tuple(cfg["dataset"].get("image_size", [64, 64]))
+    # upscaled_modes: subset of modes to run at larger size (avoids running all 3 modes × 2 sizes)
+    upscaled_modes = cfg.get("upscaled_modes", feature_modes)
+
+    experiments = [("native", native_size, feature_modes)]
+    if cfg.get("compare_upscaled", False):
+        up_size = tuple(cfg.get("image_size_upscaled", [128, 128]))
+        experiments.append(("upscaled", up_size, upscaled_modes))
+
     # ----------------------------------------------------------------
-    # 3 & 4. Train and evaluate for each feature mode × model
+    # 3 & 4. Train and evaluate for each image size × feature mode × model
     # ----------------------------------------------------------------
     model_configs = cfg.get("models", [])
     all_results = []
 
-    for feat_mode in feature_modes:
-        logger.info(f"\n{'=' * 60}")
-        logger.info(f"Feature mode: {feat_mode}")
-        logger.info(f"{'=' * 60}")
+    for size_label, image_size, modes_for_size in experiments:
+        for feat_mode in modes_for_size:
+            logger.info(f"\n{'=' * 60}")
+            logger.info(f"Image size: {image_size} ({size_label}) | Feature mode: {feat_mode}")
+            logger.info(f"{'=' * 60}")
 
-        # Extract features
-        logger.info("Extracting training features...")
-        X_train, y_train = extract_features_batch(
-            splits["train"], image_size=image_size, mode=feat_mode,
-            hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
-        )
-
-        logger.info("Extracting validation features...")
-        X_val, y_val = extract_features_batch(
-            splits["val"], image_size=image_size, mode=feat_mode,
-            hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
-        )
-
-        logger.info("Extracting test features...")
-        X_test, y_test = extract_features_batch(
-            splits["test"], image_size=image_size, mode=feat_mode,
-            hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
-        )
-
-        for model_cfg in model_configs:
-            model_name_cfg = model_cfg["name"]
-            tag = f"{model_name_cfg}_{feat_mode}"
-
-            logger.info(f"\n--- Training {tag} ---")
-            t0 = time.time()
-
-            pipeline, best_params, cv_score, actual_name = train_model(
-                X_train, y_train, model_cfg, random_seed=random_seed
-            )
-            train_time = time.time() - t0
-            tag = f"{actual_name}_{feat_mode}"
-
-            logger.info(f"  Training time: {train_time:.1f}s")
-
-            # Save model
-            save_model(pipeline, tag, results_dir / "models")
-
-            # Evaluate on val
-            logger.info("  Evaluating on validation set...")
-            val_metrics = evaluate_model(
-                pipeline, X_val, y_val, class_names,
-                split_name="val", model_name=tag, results_dir=results_dir,
+            # Extract features
+            logger.info("Extracting training features...")
+            X_train, y_train = extract_features_batch(
+                splits["train"], image_size=image_size, mode=feat_mode,
+                hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
             )
 
-            # Evaluate on test
-            logger.info("  Evaluating on test set...")
-            test_metrics = evaluate_model(
-                pipeline, X_test, y_test, class_names,
-                split_name="test", model_name=tag, results_dir=results_dir,
+            logger.info("Extracting validation features...")
+            X_val, y_val = extract_features_batch(
+                splits["val"], image_size=image_size, mode=feat_mode,
+                hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
             )
 
-            all_results.append({
-                "model": actual_name,
-                "feature_mode": feat_mode,
-                "cv_score": cv_score,
-                "val_accuracy": val_metrics["accuracy"],
-                "val_f1": val_metrics["macro_f1"],
-                "test_accuracy": test_metrics["accuracy"],
-                "test_f1": test_metrics["macro_f1"],
-                "train_time_s": train_time,
-            })
+            logger.info("Extracting test features...")
+            X_test, y_test = extract_features_batch(
+                splits["test"], image_size=image_size, mode=feat_mode,
+                hog_cfg=hog_cfg, color_cfg=color_cfg, lbp_cfg=lbp_cfg,
+            )
+
+            for model_cfg in model_configs:
+                model_name_cfg = model_cfg["name"]
+
+                logger.info(f"\n--- Training {model_name_cfg} [{feat_mode}, {size_label}] ---")
+                t0 = time.time()
+
+                pipeline, best_params, cv_score, actual_name = train_model(
+                    X_train, y_train, model_cfg, random_seed=random_seed
+                )
+                train_time = time.time() - t0
+
+                # Tag includes size_label so upscaled and native models don't overwrite each other
+                size_suffix = "" if size_label == "native" else f"_{size_label}"
+                tag = f"{actual_name}_{feat_mode}{size_suffix}"
+
+                logger.info(f"  Training time: {train_time:.1f}s  |  tag={tag}")
+
+                # Save model
+                save_model(pipeline, tag, results_dir / "models")
+
+                # Evaluate on val
+                logger.info("  Evaluating on validation set...")
+                val_metrics = evaluate_model(
+                    pipeline, X_val, y_val, class_names,
+                    split_name="val", model_name=tag, results_dir=results_dir,
+                )
+
+                # Evaluate on test
+                logger.info("  Evaluating on test set...")
+                test_metrics = evaluate_model(
+                    pipeline, X_test, y_test, class_names,
+                    split_name="test", model_name=tag, results_dir=results_dir,
+                )
+
+                all_results.append({
+                    "model": actual_name,
+                    "feature_mode": feat_mode,
+                    "image_size": f"{image_size[0]}x{image_size[1]}",
+                    "size_label": size_label,
+                    "cv_score": cv_score,
+                    "val_accuracy": val_metrics["accuracy"],
+                    "val_f1": val_metrics["macro_f1"],
+                    "test_accuracy": test_metrics["accuracy"],
+                    "test_f1": test_metrics["macro_f1"],
+                    "train_time_s": train_time,
+                })
 
     # ----------------------------------------------------------------
     # 5. Save summary table

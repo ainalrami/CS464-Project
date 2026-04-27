@@ -29,7 +29,7 @@ from src.data.dataset import (
     load_dataset, create_splits, save_split_metadata,
     load_split_metadata, EuroSATDataset, get_dl_transforms,
 )
-from src.dl.model import build_model
+from src.dl.model import build_model, build_cnn
 from src.dl.train import train_model
 from src.dl.evaluate import evaluate_model
 from src.evaluation.plots import plot_training_curves
@@ -42,7 +42,7 @@ logging.basicConfig(
 logger = logging.getLogger("run_dl")
 
 
-def run_training(cfg, augmentation_enabled, results_dir, model_tag):
+def run_training(cfg, augmentation_enabled, results_dir, model_tag, architecture=None):
     """
     Run one full DL training + evaluation cycle.
 
@@ -51,6 +51,8 @@ def run_training(cfg, augmentation_enabled, results_dir, model_tag):
         augmentation_enabled: Whether to use data augmentation.
         results_dir: Output directory.
         model_tag: Tag for naming saved files.
+        architecture: Override architecture string ("resnet18" or "cnn").
+                      If None, reads from cfg["model"]["architecture"].
     """
     random_seed = cfg.get("random_seed", 42)
     torch.manual_seed(random_seed)
@@ -101,11 +103,20 @@ def run_training(cfg, augmentation_enabled, results_dir, model_tag):
     logger.info(f"Dataset sizes — Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
     # Build model
-    model = build_model(
-        num_classes=model_cfg.get("num_classes", 10),
-        pretrained=model_cfg.get("pretrained", True),
-        freeze_backbone=model_cfg.get("freeze_backbone", False),
-    )
+    if architecture is None:
+        architecture = model_cfg.get("architecture", "resnet18")
+    architecture = architecture.lower()
+    if architecture == "cnn":
+        model = build_cnn(
+            num_classes=model_cfg.get("num_classes", 10),
+            dropout=model_cfg.get("cnn_dropout", 0.5),
+        )
+    else:
+        model = build_model(
+            num_classes=model_cfg.get("num_classes", 10),
+            pretrained=model_cfg.get("pretrained", True),
+            freeze_backbone=model_cfg.get("freeze_backbone", False),
+        )
 
     # Train
     logger.info(f"\nTraining {model_tag} (augmentation={'ON' if augmentation_enabled else 'OFF'})...")
@@ -172,19 +183,27 @@ def main():
 
     all_results = []
 
-    # Train WITH augmentation
-    result = run_training(cfg, augmentation_enabled=True, results_dir=results_dir,
-                          model_tag="ResNet18_aug")
-    all_results.append(result)
+    # Support both "architectures" (list) and legacy "architecture" (single string)
+    arch_field = cfg["model"].get("architectures", cfg["model"].get("architecture", "resnet18"))
+    architectures = arch_field if isinstance(arch_field, list) else [arch_field]
 
-    # Optionally train WITHOUT augmentation for comparison
-    if cfg.get("compare_augmentation", False):
-        logger.info("\n" + "=" * 60)
-        logger.info("Running comparison: WITHOUT augmentation")
-        logger.info("=" * 60)
-        result_no_aug = run_training(cfg, augmentation_enabled=False, results_dir=results_dir,
-                                     model_tag="ResNet18_noaug")
-        all_results.append(result_no_aug)
+    for arch in architectures:
+        arch_lower = arch.lower()
+        tag_prefix = "CNN" if arch_lower == "cnn" else "ResNet18"
+
+        logger.info(f"\n{'=' * 60}")
+        logger.info(f"Architecture: {arch_lower.upper()}")
+        logger.info(f"{'=' * 60}")
+
+        result = run_training(cfg, augmentation_enabled=True, results_dir=results_dir,
+                              model_tag=f"{tag_prefix}_aug", architecture=arch_lower)
+        all_results.append(result)
+
+        if cfg.get("compare_augmentation", False):
+            logger.info(f"\nRunning {arch_lower} WITHOUT augmentation...")
+            result_no_aug = run_training(cfg, augmentation_enabled=False, results_dir=results_dir,
+                                         model_tag=f"{tag_prefix}_noaug", architecture=arch_lower)
+            all_results.append(result_no_aug)
 
     # Save summary
     summary_df = pd.DataFrame(all_results)

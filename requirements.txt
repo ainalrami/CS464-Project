@@ -15,5 +15,7 @@ joblib>=1.1.0
 torch>=1.10.0
 torchvision>=0.11.0
 
+tabulate>=0.9.0
+
 # Optional (fallback to Logistic Regression if not installed)
 xgboost>=2.0.0
