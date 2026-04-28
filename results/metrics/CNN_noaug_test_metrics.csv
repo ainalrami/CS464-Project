@@ -1,0 +1,2 @@
+model,split,accuracy,macro_precision,macro_recall,macro_f1
+CNN_noaug,test,0.971358024691358,0.9721001510972662,0.9689555555555556,0.9703064056652508

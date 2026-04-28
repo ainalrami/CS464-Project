@@ -58,6 +58,7 @@ models:
       subsample: [0.8, 1.0]
     cv_folds: 2
     n_iter: 5
+    n_jobs: 1
 
 # Upscaling comparison:
 #   Reruns only hog_color_texture mode at 128x128 (not all 3 modes)

@@ -242,7 +242,7 @@ def main():
     logger.info("DL Pipeline Complete!")
     logger.info(f"{'=' * 60}")
     logger.info(f"Summary saved to {summary_path}")
-    logger.info(f"\n{summary_df.to_string(index=False)}")
+    logger.info(f"\n{combined.to_string(index=False)}")
 
 
 if __name__ == "__main__":

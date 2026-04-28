@@ -19,6 +19,9 @@ data/
 # Available via Google Drive link, see results/models/README.md
 results/models/RandomForest_*.pkl
 
+# Trained SVM models — too large for GitHub (~200 MB each)
+results/models/SVM_*.pkl
+
 # DL checkpoints (large)
 results/models/*.pt
 results/models/*.joblib

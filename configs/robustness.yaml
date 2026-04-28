@@ -4,8 +4,9 @@
 # Dataset
 dataset:
   root: "./data/EuroSAT_RGB"
-  image_size_ml: [64, 64]       # For ML models
-  image_size_dl: [224, 224]     # For DL model
+  image_size_ml: [64, 64]           # For ML models (native)
+  image_size_ml_upscaled: [128, 128] # For upscaled ML models
+  image_size_dl: [224, 224]         # For DL models
 
 # Data splitting — informational only, not read by run_robustness.py.
 # Split metadata is loaded from disk (saved by run_ml.py / run_dl.py).

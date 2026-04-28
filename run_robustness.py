@@ -121,6 +121,19 @@ def main():
             f"or change feature_mode in robustness.yaml."
         )
 
+    # Also load upscaled ML models (suffix _{feature_mode}_upscaled)
+    ml_models_upscaled = {}
+    image_size_ml_upscaled = tuple(cfg["dataset"].get("image_size_ml_upscaled", [128, 128]))
+    if models_dir.exists():
+        for pkl_file in sorted(models_dir.glob("*.pkl")):
+            model_name = pkl_file.stem
+            if model_name.endswith(f"_{feature_mode}_upscaled"):
+                logger.info(f"Loading upscaled ML model: {model_name}")
+                try:
+                    ml_models_upscaled[model_name] = joblib.load(pkl_file)
+                except Exception as e:
+                    logger.warning(f"Could not load {pkl_file}: {e}")
+
     # ----------------------------------------------------------------
     # 3. Load all trained DL model checkpoints (ResNet18 and/or CNN)
     # ----------------------------------------------------------------
@@ -215,6 +228,31 @@ def main():
             lbp_cfg=lbp_cfg,
             results_dir=results_dir,
         )
+
+    # ----------------------------------------------------------------
+    # 6. Run robustness for upscaled ML models (128×128)
+    # ----------------------------------------------------------------
+    if ml_models_upscaled:
+        logger.info(f"\n{'='*60}")
+        logger.info("Robustness evaluation for UPSCALED ML models (128x128)")
+        logger.info(f"{'='*60}")
+        upscaled_results = run_robustness_evaluation(
+            ml_models=ml_models_upscaled,
+            dl_model=None,
+            dl_transform=dl_transform,
+            test_samples=test_samples,
+            class_names=class_names,
+            degradations_cfg=degradations_cfg,
+            image_size_ml=image_size_ml_upscaled,
+            feature_mode=feature_mode,
+            hog_cfg=hog_cfg,
+            color_cfg=color_cfg,
+            lbp_cfg=lbp_cfg,
+            results_dir=results_dir,
+        )
+        import pandas as pd
+        combined = pd.concat([combined, upscaled_results], ignore_index=True)
+        logger.info(f"Added {len(upscaled_results)} upscaled robustness rows.")
 
     # Save merged results
     out_path = results_dir / "metrics" / "robustness_results.csv"

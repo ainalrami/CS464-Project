@@ -249,8 +249,8 @@ def main():
     logger.info(f"\n{'=' * 60}")
     logger.info("Summarization complete!")
     logger.info(f"{'=' * 60}")
-    logger.info(f"\nPlots  → {plots_dir}/")
-    logger.info(f"Tables → {metrics_dir}/")
+    logger.info(f"\nPlots  -> {plots_dir}/")
+    logger.info(f"Tables -> {metrics_dir}/")
 
 
 if __name__ == "__main__":

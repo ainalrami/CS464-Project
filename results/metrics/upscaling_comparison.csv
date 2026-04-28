@@ -1,0 +1,2 @@
+model,feature_mode,test_accuracy_upscaled,test_f1_upscaled
+XGBoost,hog_color_texture,0.9076543209876544,0.9032566306054368
